@@ -12,7 +12,7 @@ while True:
     image = camera.read()
     out.write(image)
 
-    cv.imshow('image', image)
+    # cv.imshow('image', image)
 
     if cv.waitKey(1) == ord('q'):
         break
