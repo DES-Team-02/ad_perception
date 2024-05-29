@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import time
  
 cap = cv.VideoCapture('/home/niklas/SeaMe/ADS01/ad_perception/camera_test/output_1.avi')
 
@@ -7,26 +8,26 @@ def frame_processor(image):
 	warped_image = warp_image(image)
 	
 	# applying gaussian Blur which removes noise from the image 
-	kernel_size = 7
+	#kernel_size = 7
 	# Applying gaussian blur to remove noise from the frames
-	blur = cv.GaussianBlur(warped_image, (kernel_size, kernel_size), 0)
+	#blur = cv.GaussianBlur(warped_image, (kernel_size, kernel_size), 0)
 	#cv.imshow('GaussianBlur Image', blur)
 
 	#Using HSV filter
-	frame_HSV = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+	frame_HSV = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 	#values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
-	image_hsv = cv.inRange(frame_HSV, (0, 0, 150), (180, 255, 255))
-	#cv.imshow('hsv', image_hsv)
+	image_hsv = cv.inRange(frame_HSV, (0, 0, 80), (180, 255, 255))
+	cv.imshow('hsv', image_hsv)
 
 	#apply the sliding window for left and right lane with base midpoint of lane at xm
-	left, left_line = sliding_windows(image_hsv, warped_image, 5, xm=320)
-	right, right_line = sliding_windows(image_hsv, warped_image, 5, xm=1030)
+	left, left_line = sliding_windows(image_hsv, image, 5, xm=320)
+	right, right_line = sliding_windows(image_hsv, image, 5, xm=1030)
 
 	#calculate middlepoints with left and right lane points 
 	middle_points = calculate_middle_path(left, right)
 
 	for point in middle_points:
-		draw_lines_points(warped_image, point=point)
+		draw_lines_points(image, point=point)
 	return 0
 
 def roi_boxes(image, midpoint):
@@ -55,6 +56,8 @@ def sliding_windows(image, warped_image, num_windows, xm=320):
 		lines = hough_transform(masked_image)
 		if lines is not None:
 			average_line, average_lane_line = average_lane_lines(lines, midpoint)
+			if len(average_lane_line) <= 1:
+				break
 			point = (average_lane_line[2].astype(int),midpoint[1])
 			result[i] = point
 			line[i] = average_lane_line
@@ -133,7 +136,7 @@ def hough_transform(image):
     return cv.HoughLinesP(image, rho = rho, theta = theta, threshold = threshold,
         minLineLength = minLineLength, maxLineGap = maxLineGap)
 
-def average_lane_lines(lines, midpoint):
+def average_lane_lines(lines, midpoint): 
 	valid_right_line = []
 	valid_lines = [] #(slope, intercept)
 	xm,ym = midpoint
@@ -141,7 +144,9 @@ def average_lane_lines(lines, midpoint):
 		for line in lines:
 			for x1, y1, x2, y2 in line:
 				if x1 == x2:
-					x2=x2+1
+					x2 = x2+1
+				if y1 == y2:
+					y2 = y2+1
 				# calculating slope of a line
 				slope = (y2 - y1) / (x2 - x1)
 				# calculating intercept of a line
@@ -152,18 +157,21 @@ def average_lane_lines(lines, midpoint):
 					valid_right_line.append(line)	#useable complete line
 					valid_lines.append((slope, intercept, x))	#useable slope, intercept and x value for lines
 		#calculate the average of valid lines
-		average_line = np.mean(valid_right_line, axis=0)
-		average_lane_line = np.mean(valid_lines, axis=0)
+		if len(valid_lines) > 0:
+			average_line = np.mean(valid_right_line, axis=0)
+			average_lane_line = np.mean(valid_lines, axis=0)
 
-		return average_line.astype(int), average_lane_line
+			return average_line.astype(int), average_lane_line
+		else:
+			return [[-1,-1,-1,-1]] , [[-1,-1,-1]]
 
 while cap.isOpened():
 	ret, frame = cap.read()
 
-	#cv.imshow('frame', frame)
 	frame_processor(frame)
+	#cv.imshow('frame', frame)
 
-	if cv.waitKey(100) == ord('q'):
+	if cv.waitKey(1) == ord('q'):
 		break
 
 cap.release()
