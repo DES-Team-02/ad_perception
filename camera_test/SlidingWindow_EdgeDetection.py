@@ -14,20 +14,20 @@ def frame_processor(image):
 	#cv.imshow('GaussianBlur Image', blur)
 
 	#Using HSV filter
-	frame_HSV = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+	frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
 	#values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
-	image_hsv = cv.inRange(frame_HSV, (0, 0, 80), (180, 255, 255))
+	image_hsv = cv.inRange(frame_HSV, (0, 0, 160), (180, 255, 255))
 	cv.imshow('hsv', image_hsv)
 
 	#apply the sliding window for left and right lane with base midpoint of lane at xm
-	left, left_line = sliding_windows(image_hsv, image, 5, xm=320)
-	right, right_line = sliding_windows(image_hsv, image, 5, xm=1030)
+	left, left_line = sliding_windows(image_hsv, warped_image, 5, xm=320)
+	right, right_line = sliding_windows(image_hsv, warped_image, 5, xm=1030)
 
 	#calculate middlepoints with left and right lane points 
 	middle_points = calculate_middle_path(left, right)
 
 	for point in middle_points:
-		draw_lines_points(image, point=point)
+		draw_lines_points(warped_image, point=point)
 	return 0
 
 def roi_boxes(image, midpoint):
@@ -40,7 +40,7 @@ def roi_boxes(image, midpoint):
 	end_point = (midpoint[0]+box_width, midpoint[1]+100)
 	mask_box = cv.rectangle(mask, start_point, end_point, 255, -1) 
 	masked_image = cv.bitwise_and(image, mask_box)
-	cv.imshow('Box Image', mask_box)
+	#cv.imshow('Box Image', mask_box)
 	return masked_image
 
 def sliding_windows(image, warped_image, num_windows, xm=320):
@@ -48,9 +48,9 @@ def sliding_windows(image, warped_image, num_windows, xm=320):
 	result = [[-1,-1,-1]]*num_windows
 	line = [[-1,-1,-1]]*num_windows
 	midpoint = (xm, height-100)
+	im_h = sobel_inner_line(image, xm)
+	#cv.imshow('Sobel Image', im_h)
 	for i in range(num_windows):
-		im_h = sobel_inner_line(image, xm)
-		#cv.imshow('Sobel Image', im_h)
 		masked_image = roi_boxes(im_h, midpoint)
 		#cv.imshow('Masked Image', masked_image)
 		lines = hough_transform(masked_image)
@@ -68,18 +68,33 @@ def sliding_windows(image, warped_image, num_windows, xm=320):
 def draw_lines_points(image, lines=None, point=None):
 	#draw lines and points and show the image
 	draw_image = image
+    
 	if lines is not None:
-		for line in lines:
-			x1,y1,x2,y2 = line
-			draw_image = cv.line(image, (int(x1),int(y1)),(int(x2),int(y2)),(0, 0, 255),5)
+		# Convert lines to a NumPy array if it's not already
+		lines = np.array(lines)
+
+		if lines.ndim == 1:
+			lines = lines.reshape(1, 4)
+
+		# Extract x1, y1, x2, y2 for all lines
+		x1 = lines[:, 0]
+		y1 = lines[:, 1]
+		x2 = lines[:, 2]
+		y2 = lines[:, 3]
+		
+		# Iterate through lines using NumPy arrays
+		for i in range(len(lines)):
+			cv.line(draw_image, (int(x1[i]), int(y1[i])), (int(x2[i]), int(y2[i])), (0, 0, 255), 5)
+
 	if point is not None:
-		draw_image = cv.circle(image, (point[0],point[1]), radius=5, color=(0, 255, 0), thickness=-1)
-	cv.imshow("Hough Transformation",draw_image)
+		cv.circle(draw_image, (point[0], point[1]), radius=5, color=(0, 255, 0), thickness=-1)
+
+	cv.imshow("Hough Transformation", draw_image)
 
 def calculate_middle_path(left, right):
 	#calculate the middle of left and right lane with given parameters
 	middle = [None] * 5
-	half_lane_width = 520	#assumpt half lane in pixels
+	half_lane_width = 550	#assumpt half lane in pixels
 	for i in range(len(left)):
 		x_left = left[i]
 		x_right = right[i]
@@ -141,35 +156,60 @@ def average_lane_lines(lines, midpoint):
 	valid_lines = [] #(slope, intercept)
 	xm,ym = midpoint
 	if lines is not None:
-		for line in lines:
-			for x1, y1, x2, y2 in line:
-				if x1 == x2:
-					x2 = x2+1
-				if y1 == y2:
-					y2 = y2+1
-				# calculating slope of a line
-				slope = (y2 - y1) / (x2 - x1)
-				# calculating intercept of a line
-				intercept = y1 - (slope * x1)
-				# intercept with horizontal line
-				x = (ym - intercept) /slope
-				if not -0.2 < slope < 0.2:
-					valid_right_line.append(line)	#useable complete line
-					valid_lines.append((slope, intercept, x))	#useable slope, intercept and x value for lines
-		#calculate the average of valid lines
+		# Convert lines to a NumPy array if it's not already
+		lines = np.array(lines)
+
+		# Extract x1, y1, x2, y2 for all lines
+		x1 = lines[:, :, 0]
+		y1 = lines[:, :, 1]
+		x2 = lines[:, :, 2]
+		y2 = lines[:, :, 3]
+
+		# Handle the cases where x1 == x2 or y1 == y2
+		x2 = np.where(x1 == x2, x2 + 1, x2)
+
+		# Calculate slopes
+		slopes = (y2 - y1) / (x2 - x1)
+
+		# Calculate intercepts
+		intercepts = y1 - (slopes * x1)
+
+		# Calculate x-intercepts with horizontal line ym
+		x_intercepts = (ym - intercepts) / slopes
+
+		# Filter out invalid lines (where y1 == y2)
+		valid_indices = (y1 != y2) & (np.abs(slopes) >= 0.2) #& (x_intercepts < xm)
+
+		valid_right_lines = lines[valid_indices]
+		valid_slopes = slopes[valid_indices]
+		valid_intercepts = intercepts[valid_indices]
+		valid_x_intercepts = x_intercepts[valid_indices]
+
+		# Prepare valid_lines as tuples of (slope, intercept, x)
+		valid_lines_array = np.column_stack((valid_slopes, valid_intercepts, valid_x_intercepts))
+
+		valid_right_line.extend(valid_right_lines.tolist())
+		valid_lines.extend(valid_lines_array.tolist())
+
+		# Calculate the average of valid lines
 		if len(valid_lines) > 0:
 			average_line = np.mean(valid_right_line, axis=0)
 			average_lane_line = np.mean(valid_lines, axis=0)
-
 			return average_line.astype(int), average_lane_line
 		else:
-			return [[-1,-1,-1,-1]] , [[-1,-1,-1]]
+			return [[-1, -1, -1, -1]], [[-1, -1, -1]]
 
 while cap.isOpened():
 	ret, frame = cap.read()
 
-	frame_processor(frame)
+	
 	#cv.imshow('frame', frame)
+	start_time = time.time()
+	frame_processor(frame)
+	end_time = time.time()
+
+	execution_time = end_time - start_time
+	print(f"Execution time: {execution_time} seconds")
 
 	if cv.waitKey(1) == ord('q'):
 		break
