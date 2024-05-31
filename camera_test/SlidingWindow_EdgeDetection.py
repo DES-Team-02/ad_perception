@@ -1,7 +1,9 @@
+from lane_follower import LaneFollower
+
 import numpy as np
 import cv2 as cv
 import time
- 
+
 cap = cv.VideoCapture('output_1.avi')
 
 def frame_processor(image):
@@ -199,55 +201,8 @@ def average_lane_lines(lines, midpoint):
 		else:
 			return [[-1, -1, -1, -1]], [[-1, -1, -1]]
 
-def calculate_control(middle_points):
-    max_steer = 1.0
-    normal_throttle = 1.0
 
-    sum_x = 0
-    sum_y = 0
-    sum_x2 = 0
-    sum_xy = 0
-    n = 0
-    for point in middle_points:
-        if point is None:
-            continue
-        x, y = point
-        y = y
-        sum_x += x
-        sum_y += y
-        sum_x2 += x**2
-        sum_xy += x * y
-        n += 1
-
-    a = 0
-    b = 0
-
-    # No Initialize
-    lane_offset = 0.0
-    lane_curvature = 0.0
-    if n > 1:
-        a = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x**2)
-        b = (sum_y * sum_x2 - sum_x * sum_xy) / (n * sum_x2 - sum_x**2)
-        lane_start_point = (720 - b) / a
-        lane_middle_point = (360 - b) / a
-        lane_curvature = (lane_middle_point - lane_start_point) / 640
-        lane_offset = (lane_start_point - 640) / 640
-    
-    print(f'lane_offset = {lane_offset}')
-    print(f'lane_curvature = {lane_curvature}')
-
-    steer = lane_offset + lane_curvature
-    
-    if max_steer < steer:
-        steer = max_steer
-    elif steer < -max_steer:
-        steer = -max_steer
-        
-    throttle = normal_throttle
-    
-    
-    print(f'steer = {steer}')
-    return throttle, steer
+lane_follower = LaneFollower(width=1280, height=720, max_steer=1.0, normal_throttle=1.0)
 
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -260,8 +215,9 @@ while cap.isOpened():
 	execution_time = end_time - start_time
 	print(f"Execution time: {execution_time} seconds")
  
-	throttle, steer = calculate_control(middle_points)
-
+	lane_follower.calculate_control(middle_points)
+	throttle, steer = lane_follower.get_control()
+ 
 	if cv.waitKey(1) == ord('q'):
 		break
 
