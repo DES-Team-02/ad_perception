@@ -19,7 +19,7 @@ def frame_processor(image):
 	frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
 	#values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
 	image_hsv = cv.inRange(frame_HSV, (0, 0, 160), (180, 255, 255))
-	cv.imshow('hsv', image_hsv)
+	# cv.imshow('hsv', image_hsv)
 
 	#apply the sliding window for left and right lane with base midpoint of lane at xm
 	left, left_line = sliding_windows(image_hsv, warped_image, 5, xm=320)

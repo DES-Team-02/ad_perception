@@ -7,6 +7,9 @@ class LaneFollower():
 
         self.lane_offset = 0.0
         self.lane_curvature = 0.0
+        
+        self.throttle = 0.0
+        self.steer = 0.0
 
     def calculate_control(self, middle_points):
         sum_x = 0
@@ -34,6 +37,8 @@ class LaneFollower():
             lane_middle_point = (self.height/2 - b) / a
             self.lane_offset = (lane_start_point - (self.width/2)) / (self.width/2)
             self.lane_curvature = (lane_middle_point - lane_start_point) / (self.width/2)
+        else:
+            return
         
         print(f'self.lane_offset = {self.lane_offset}')
         print(f'self.lane_curvature = {self.lane_curvature}')
