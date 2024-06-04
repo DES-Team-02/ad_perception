@@ -27,7 +27,6 @@ camera = CSICamera(width=1280, height=720, capture_width=1280, capture_height=72
 #     ret, frame = cap.read()
 while 1:
     image = camera.read()
-
     #cv.imshow('frame', frame)
     start_time = time.time()
     # middle_points = frame_processor(frame)
@@ -40,7 +39,7 @@ while 1:
     lane_follower.calculate_control(middle_points)
     throttle, steer = lane_follower.get_control()
     
-    service.SetThrottle(throttle * 0.1)
+    service.SetThrottle(throttle * 0.2)
     service.SetSteering(steer * -1.0)
 
     if cv.waitKey(1) == ord('q'):
