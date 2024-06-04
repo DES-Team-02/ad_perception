@@ -6,11 +6,11 @@ class ImageProcessor():
         self.hsv_values = (0, 0, 145) #(0, 0, 160)
         self.first_left_box_middle_x = 120      #Middlepoint of left Box
         self.first_right_box_middle_x = 1160    #Middlepoint of right Box
-        self.warp_parameters = [(355,250),(0 ,600),(800,250),(1185,600)]    #Warping Parameters
+        self.warp_parameters = [(390,300),(0 ,600),(820,300),(1180,600)]    #Warping Parameters
         #[(320,110),(0 ,420),(800,110),(1070,420)]
         self.num_boxes = 5      #Number of boxes
         self.box_dim = (100, 100) # height, width
-        self.half_lane_width = 580	#assumpt half lane in pixels
+        self.half_lane_width = 550	#assumpt half lane in pixels
         # Hough Line Transform
         self.rho = 1			
         # Angle resolution of the accumulator in radians.
