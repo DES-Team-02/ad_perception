@@ -3,11 +3,12 @@ import pydbus_module
 
 from lane_follower import LaneFollower
 from image_processor import *
+from class_image_processor import ImageProcessor
 
 import cv2 as cv
 import time
 
-from jetcam.csi_camera import CSICamera
+#from jetcam.csi_camera import CSICamera
 
 
 # PyDbus Setting
@@ -18,19 +19,20 @@ print("VehicleControl D-Bus service is running.")
 
 # Controller Init
 lane_follower = LaneFollower(width=1280, height=720, max_steer=1.0, normal_throttle=1.0)
+imageprocessor = ImageProcessor()
 
 # # Image Init
-# cap = cv.VideoCapture('camera_test/output.avi')
-camera = CSICamera(width=1280, height=720, capture_width=1280, capture_height=720, capture_fps=5)
+cap = cv.VideoCapture('camera_test/new_output.avi')
+#camera = CSICamera(width=1280, height=720, capture_width=1280, capture_height=720, capture_fps=5)
 
 # while cap.isOpened():
 #     ret, frame = cap.read()
 while 1:
-    image = camera.read()
+    ret, image = cap.read()
     #cv.imshow('frame', frame)
     start_time = time.time()
     # middle_points = frame_processor(frame)
-    middle_points = frame_processor(image)
+    middle_points = imageprocessor.frame_processor(image)
     end_time = time.time()
 
     execution_time = end_time - start_time

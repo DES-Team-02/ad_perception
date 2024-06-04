@@ -3,13 +3,14 @@ import cv2 as cv
 
 class ImageProcessor():
     def __init__(self):
-        self.hsv_values = (0, 0, 160) #(0, 0, 160)
-        self.first_left_box_middle_x = 320      #Middlepoint of left Box
-        self.first_right_box_middle_x = 1030    #Middlepoint of right Box
-        self.warp_parameters = [(320,110),(0 ,420),(800,110),(1070,420)]    #Warping Parameters
+        self.hsv_values = (0, 0, 145) #(0, 0, 160)
+        self.first_left_box_middle_x = 120      #Middlepoint of left Box
+        self.first_right_box_middle_x = 1160    #Middlepoint of right Box
+        self.warp_parameters = [(355,250),(0 ,600),(800,250),(1185,600)]    #Warping Parameters
+        #[(320,110),(0 ,420),(800,110),(1070,420)]
         self.num_boxes = 5      #Number of boxes
         self.box_dim = (100, 100) # height, width
-        self.half_lane_width = 550	#assumpt half lane in pixels
+        self.half_lane_width = 580	#assumpt half lane in pixels
         # Hough Line Transform
         self.rho = 1			
         # Angle resolution of the accumulator in radians.
@@ -28,7 +29,7 @@ class ImageProcessor():
         frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
         #values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
         image_hsv = cv.inRange(frame_HSV, self.hsv_values, (180, 255, 255))
-        # cv.imshow('hsv', image_hsv)
+        cv.imshow('hsv', image_hsv)
 
         #apply the sliding window for left and right lane with base midpoint of lane at xm
         left, left_line = self.sliding_windows(image_hsv, warped_image, xm=self.first_left_box_middle_x)
@@ -81,7 +82,10 @@ class ImageProcessor():
                 result[i] = point
                 line[i] = average_lane_line
                 self.draw_lines_points(warped_image, average_line, point)
+                xm = point[0]
                 midpoint = (point[0], height-(i+2)*self.box_dim[0])
+            else:
+                midpoint = (xm, height-(i+2)*self.box_dim[0])
         return result, line
     
     def sobel_inner_line(self, image, xm):
