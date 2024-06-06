@@ -10,7 +10,7 @@ class ImageProcessor():
         #[(320,110),(0 ,420),(800,110),(1070,420)]
         self.num_boxes = 5      #Number of boxes
         self.box_dim = (100, 100) # height, width
-        self.half_lane_width = 550	#assumpt half lane in pixels
+        self.half_lane_width = 580	#assumpt half lane in pixels
         # Hough Line Transform
         self.rho = 1			
         # Angle resolution of the accumulator in radians.
