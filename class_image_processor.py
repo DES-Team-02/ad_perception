@@ -3,14 +3,14 @@ import cv2 as cv
 
 class ImageProcessor():
     def __init__(self):
-        self.hsv_values = (0, 0, 145) #(0, 0, 160)
+        self.hsv_values = (0, 0, 155) #(0, 0, 160)
         self.first_left_box_middle_x = 120      #Middlepoint of left Box
         self.first_right_box_middle_x = 1160    #Middlepoint of right Box
         self.warp_parameters = [(390,300),(0 ,600),(820,300),(1180,600)]    #Warping Parameters
         #[(320,110),(0 ,420),(800,110),(1070,420)]
         self.num_boxes = 5      #Number of boxes
         self.box_dim = (100, 100) # height, width
-        self.half_lane_width = 580	#assumpt half lane in pixels
+        self.half_lane_width = 510	#assumpt half lane in pixels
         # Hough Line Transform
         self.rho = 1			
         # Angle resolution of the accumulator in radians.
@@ -29,7 +29,7 @@ class ImageProcessor():
         frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
         #values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
         image_hsv = cv.inRange(frame_HSV, self.hsv_values, (180, 255, 255))
-        cv.imshow('hsv', image_hsv)
+        # cv.imshow('hsv', image_hsv)
 
         #apply the sliding window for left and right lane with base midpoint of lane at xm
         left, left_line = self.sliding_windows(image_hsv, warped_image, xm=self.first_left_box_middle_x)
@@ -190,7 +190,7 @@ class ImageProcessor():
         if point is not None:
             cv.circle(draw_image, (point[0], point[1]), radius=5, color=(0, 255, 0), thickness=-1)
 
-        cv.imshow("Hough Transformation", draw_image)
+        # cv.imshow("Hough Transformation", draw_image)
 
     def calculate_middle_path(self, left, right):
         #calculate the middle of left and right lane with given parameters
