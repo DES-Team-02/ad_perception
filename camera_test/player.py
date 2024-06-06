@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
  
-cap = cv.VideoCapture('output.avi')
+cap = cv.VideoCapture('new_output.avi')
  
 while cap.isOpened():
     ret, frame = cap.read()
@@ -11,7 +11,7 @@ while cap.isOpened():
     cv.imshow('frame', frame)
     cv.imshow('gray', gray)
 
-    if cv.waitKey(100) == ord('q'):
+    if cv.waitKey(1000) == ord('q'):
         break
  
 cap.release()
