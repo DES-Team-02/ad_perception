@@ -21,7 +21,7 @@ width = 1280
 height = 720
 
 # Controller Init
-lane_follower = LaneFollower(width=width, height=height, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=1.0, k_c=1.0)
+lane_follower = LaneFollower(width=width, height=height, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=1.4, k_c=0.8)
 imageprocessor = ImageProcessor()
 
 # # Image Init
@@ -44,7 +44,7 @@ while 1:
     lane_follower.calculate_control(middle_points)
     throttle, steer = lane_follower.get_control()
     
-    service.SetThrottle(throttle * 0.2)
+    service.SetThrottle(0.2)
     service.SetSteering(steer * -1.0)
 
     if cv.waitKey(1) == ord('q'):
