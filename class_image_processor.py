@@ -30,8 +30,10 @@ class ImageProcessor():
         contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
         for contour in contours:
             area = cv.contourArea(contour)
-            if 10 < area:
+            if 100 < area:
                 cv.drawContours(edges, [contour], -1, (255), 5)
+            else:
+                continue
         # cv.imshow('edges', edges)
 
         #Using HSV filter
