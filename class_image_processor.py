@@ -28,7 +28,10 @@ class ImageProcessor():
         edges = cv.Canny(warped_image, 10, 30)
         # cv.imshow('Canny', edges)
         contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        cv.drawContours(edges, contours, -1, (255), 5)
+        for contour in contours:
+            area = cv.contourArea(contour)
+            if 10 < area:
+                cv.drawContours(edges, [contour], -1, (255), 5)
         # cv.imshow('edges', edges)
 
         #Using HSV filter
