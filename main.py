@@ -21,7 +21,7 @@ width = 1280
 height = 720
 
 # Controller Init
-lane_follower = LaneFollower(width=width, height=height, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=0.5, k_c=0.5)
+lane_follower = LaneFollower(width=width, height=height, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=1.0, k_c=1.0)
 imageprocessor = ImageProcessor()
 
 # # Image Init
