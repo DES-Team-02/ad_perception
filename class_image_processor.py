@@ -27,17 +27,20 @@ class ImageProcessor():
 
         self.low_threshold = 10
         self.high_threshold = 30
+        self.area_threshold = 10
         
         self.activate_trackbar = True
         if self.activate_trackbar:
             cv.namedWindow("edges", cv.WINDOW_NORMAL)
             cv.createTrackbar('low', 'edges', self.low_threshold, 255, nothing)
             cv.createTrackbar('high', 'edges', self.high_threshold, 255, nothing)
+            cv.createTrackbar('area', 'edges', self.area_threshold, 200, nothing)
 
     def frame_processor(self, image):
         if self.activate_trackbar:
             self.low_threshold = cv.getTrackbarPos('low', 'edges')
             self.high_threshold = cv.getTrackbarPos('high', 'edges')
+            self.area_threshold = cv.getTrackbarPos('area', 'edges')
 
         warped_image = self.warp_image(image)
         
@@ -47,7 +50,7 @@ class ImageProcessor():
         edges = np.zeros(edges.shape, dtype=np.uint8)
         for contour in contours:
             area = cv.contourArea(contour)
-            if 100 < area:
+            if self.area_threshold < area:
                 cv.drawContours(edges, [contour], -1, (255), 5)
             else:
                 continue
