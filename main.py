@@ -17,13 +17,16 @@ service = pydbus_module.VehicleControlDBusService()
 bus.publish("com.team2.VehicleControl", service)
 print("VehicleControl D-Bus service is running.")
 
+width = 1280
+height = 720
+
 # Controller Init
-lane_follower = LaneFollower(width=1280, height=720, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=0.5, k_c=0.5)
+lane_follower = LaneFollower(width=width, height=height, camera_offset=0, max_steer=1.0, normal_throttle=1.0, k_o=0.5, k_c=0.5)
 imageprocessor = ImageProcessor()
 
 # # Image Init
 #cap = cv.VideoCapture('camera_test/new_output.avi')
-camera = CSICamera(width=1280, height=720, capture_width=1280, capture_height=720, capture_fps=5)
+camera = CSICamera(width=width, height=height, capture_width=width, capture_height=height, capture_fps=5)
 
 # while cap.isOpened():
 #     ret, frame = cap.read()
