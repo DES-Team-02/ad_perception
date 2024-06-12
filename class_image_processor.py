@@ -1,6 +1,9 @@
 import numpy as np
 import cv2 as cv
 
+def nothing():
+    pass
+    
 class ImageProcessor():
     def __init__(self):
         self.hsv_values = (0, 0, 155) #(0, 0, 160)
@@ -22,16 +25,32 @@ class ImageProcessor():
         # Maximum allowed gap between points on the same line to link them
         self.maxLineGap = 5
 
+        self.low_threshold = 10
+        self.high_threshold = 30
+        self.area_threshold = 10
+        
+        self.activate_trackbar = False
+        if self.activate_trackbar:
+            cv.namedWindow("edges", cv.WINDOW_NORMAL)
+            cv.createTrackbar('low', 'edges', self.low_threshold, 500, nothing)
+            cv.createTrackbar('high', 'edges', self.high_threshold, 500, nothing)
+            cv.createTrackbar('area', 'edges', self.area_threshold, 200, nothing)
+
     def frame_processor(self, image):
+        if self.activate_trackbar:
+            self.low_threshold = cv.getTrackbarPos('low', 'edges')
+            self.high_threshold = cv.getTrackbarPos('high', 'edges')
+            self.area_threshold = cv.getTrackbarPos('area', 'edges')
+
         warped_image = self.warp_image(image)
         
-        # edges = cv.Canny(warped_image, 10, 30)
+        # edges = cv.Canny(warped_image, self.low_threshold, self.high_threshold)
         # # cv.imshow('Canny', edges)
         # contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        # edges = np.zeros(edges.shape)
+        # edges = np.zeros(edges.shape, dtype=np.uint8)
         # for contour in contours:
         #     area = cv.contourArea(contour)
-        #     if 100 < area:
+        #     if self.area_threshold < area:
         #         cv.drawContours(edges, [contour], -1, (255), 5)
         #     else:
         #         continue
@@ -49,6 +68,8 @@ class ImageProcessor():
         #apply the sliding window for left and right lane with base midpoint of lane at xm
         left, left_line = self.sliding_windows(image_hsv, warped_image, xm=self.first_left_box_middle_x)
         right, right_line = self.sliding_windows(image_hsv, warped_image, xm=self.first_right_box_middle_x)
+        # left, left_line = self.sliding_windows(add_image, warped_image, xm=self.first_left_box_middle_x)
+        # right, right_line = self.sliding_windows(add_image, warped_image, xm=self.first_right_box_middle_x)
 
         #calculate middlepoints with left and right lane points 
         middle_points = self.calculate_middle_path(left, right)
