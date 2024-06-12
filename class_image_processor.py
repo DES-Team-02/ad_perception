@@ -44,7 +44,7 @@ class ImageProcessor():
         edges = cv.Canny(warped_image, self.low_threshold, self.high_threshold)
         # cv.imshow('Canny', edges)
         contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        edges = np.zeros(edges.shape)
+        edges = np.zeros(edges.shape, dtype=np.uint8)
         for contour in contours:
             area = cv.contourArea(contour)
             if 100 < area:
