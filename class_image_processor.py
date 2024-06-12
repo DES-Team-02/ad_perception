@@ -35,15 +35,16 @@ class ImageProcessor():
                 cv.drawContours(edges, [contour], -1, (255), 5)
             else:
                 continue
-        # cv.imshow('edges', edges)
+        cv.imshow('edges', edges)
 
         #Using HSV filter
         frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
         #values are tested in testing script "hsv_filter". the 3rd value can be ajusted between 150-200
         image_hsv = cv.inRange(frame_HSV, self.hsv_values, (180, 255, 255))
-        # cv.imshow('hsv', image_hsv)
+        cv.imshow('hsv', image_hsv)
         
         add_image = cv.bitwise_and(edges, image_hsv)
+        cv.imshow('add_image', add_image)
 
         #apply the sliding window for left and right lane with base midpoint of lane at xm
         left, left_line = self.sliding_windows(add_image, warped_image, xm=self.first_left_box_middle_x)
