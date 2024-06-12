@@ -32,8 +32,8 @@ class ImageProcessor():
         self.activate_trackbar = True
         if self.activate_trackbar:
             cv.namedWindow("edges", cv.WINDOW_NORMAL)
-            cv.createTrackbar('low', 'edges', self.low_threshold, 255, nothing)
-            cv.createTrackbar('high', 'edges', self.high_threshold, 255, nothing)
+            cv.createTrackbar('low', 'edges', self.low_threshold, 500, nothing)
+            cv.createTrackbar('high', 'edges', self.high_threshold, 500, nothing)
             cv.createTrackbar('area', 'edges', self.area_threshold, 200, nothing)
 
     def frame_processor(self, image):
