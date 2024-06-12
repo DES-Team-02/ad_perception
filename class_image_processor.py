@@ -30,14 +30,14 @@ class ImageProcessor():
         
         self.activate_trackbar = True
         if self.activate_trackbar:
-            cv.namedWindow("Canny", cv.WINDOW_NORMAL)
-            cv.createTrackbar('low', 'Canny', self.low_threshold, 255, nothing)
-            cv.createTrackbar('high', 'Canny', self.high_threshold, 255, nothing)
+            cv.namedWindow("edges", cv.WINDOW_NORMAL)
+            cv.createTrackbar('low', 'edges', self.low_threshold, 255, nothing)
+            cv.createTrackbar('high', 'edges', self.high_threshold, 255, nothing)
 
     def frame_processor(self, image):
         if self.activate_trackbar:
-            self.low_threshold = cv.getTrackbarPos('low', 'Canny')
-            self.high_threshold = cv.getTrackbarPos('high', 'Canny')
+            self.low_threshold = cv.getTrackbarPos('low', 'edges')
+            self.high_threshold = cv.getTrackbarPos('high', 'edges')
 
         warped_image = self.warp_image(image)
         
