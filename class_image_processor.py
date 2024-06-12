@@ -24,6 +24,12 @@ class ImageProcessor():
 
     def frame_processor(self, image):
         warped_image = self.warp_image(image)
+        
+        edges = cv.Canny(warped_image, 10, 30)
+        # cv.imshow('Canny', edges)
+        contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        cv.drawContours(edges, contours, -1, (255), 5)
+        # cv.imshow('edges', edges)
 
         #Using HSV filter
         frame_HSV = cv.cvtColor(warped_image, cv.COLOR_BGR2HSV)
@@ -66,14 +72,14 @@ class ImageProcessor():
         result = [[-1,-1,-1]]*num_windows
         line = [[-1,-1,-1]]*num_windows
         midpoint = (xm, height-self.box_dim[0])
-        im_h = self.sobel_inner_line(image, xm)
+        # im_h = self.sobel_inner_line(image, xm)
         #cv.imshow('Sobel Image', im_h)
         for i in range(num_windows):
             # masked_image = roi_boxes(im_h, midpoint)
             # cv.imshow('Masked Image', masked_image)
             # print(midpoint)
             # lines = hough_transform(masked_image)
-            lines = self.roi_hough_transform(im_h, midpoint)
+            lines = self.roi_hough_transform(image, midpoint)
             if lines is not None:
                 average_line, average_lane_line = self.average_lane_lines(lines, midpoint)
                 if len(average_lane_line) <= 1:
